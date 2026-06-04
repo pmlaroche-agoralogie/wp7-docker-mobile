@@ -38,10 +38,10 @@ include __DIR__ . '/../includes/header.php';
         <p>Widget m&eacute;t&eacute;o personnalis&eacute;</p>
     </div>
 
-    <div class="module-card">
+    <div class="module-card" onclick="location.href='/produits'">
         <div class="mod-icon">&#128722;</div>
         <h3>Commandes</h3>
-        <p>Produits et paniers de commandes</p>
+        <p>Catalogue de produits et panier de commandes</p>
     </div>
 
     <?php if ($user['role'] === 'admin'): ?>
@@ -52,10 +52,22 @@ include __DIR__ . '/../includes/header.php';
         <p>Liste, ajout, groupes, activation</p>
     </div>
 
-    <div class="module-card">
-        <div class="mod-icon">&#9881;</div>
-        <h3>Administration</h3>
-        <p>Pages, annonces, commandes, mod&eacute;ration</p>
+    <div class="module-card" onclick="location.href='/admin/pages'">
+        <div class="mod-icon">&#128196;</div>
+        <h3>Pages de contenu</h3>
+        <p>&Eacute;diteur WYSIWYG des pages publiques</p>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/produits'">
+        <div class="mod-icon">&#128230;</div>
+        <h3>Produits</h3>
+        <p>Gestion du catalogue, fiches, photos</p>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/commandes'">
+        <div class="mod-icon">&#128203;</div>
+        <h3>Commandes re&ccedil;ues</h3>
+        <p>Suivi et livraison des commandes &eacute;leveurs</p>
     </div>
 
     <?php endif; ?>

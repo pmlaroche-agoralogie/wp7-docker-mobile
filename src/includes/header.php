@@ -14,19 +14,28 @@ function navLink(string $label, string $href, string $uri): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? SITE_NAME) ?></title>
     <link rel="stylesheet" href="/assets/css/style.css">
+    <?php if (isset($extraHead)) echo $extraHead; ?>
 </head>
 <body>
 <header class="site-header">
     <div class="header-inner">
-        <a href="/" class="site-logo"><?= SITE_NAME ?></a>
+        <a href="/" class="site-logo">
+            <img src="/media/logo-elvea64.jpg" alt="Logo ELVEA">
+            <span class="logo-text">
+                <span class="logo-name">ELVEA</span>
+                <span class="logo-sub">B&eacute;arn &middot; Pays Basque &middot; Landes</span>
+            </span>
+        </a>
         <button class="menu-toggle" aria-label="Menu" onclick="toggleMenu()">&#9776;</button>
     </div>
     <nav class="main-nav" id="main-nav">
         <ul>
             <?= navLink('Accueil', '/', $currentUri) ?>
+            <?= navLink('&Eacute;leveurs', '/eleveurs', $currentUri) ?>
+            <?= navLink('Fili&egrave;res', '/filieres', $currentUri) ?>
+            <?= navLink('Oribase', '/oribase', $currentUri) ?>
+            <?= navLink('Adh&eacute;sion', '/adhesion', $currentUri) ?>
             <?= navLink('Actualit&eacute;s', '/news', $currentUri) ?>
-            <?= navLink('&Agrave; propos', '/about', $currentUri) ?>
-            <?= navLink('Contact', '/contact', $currentUri) ?>
             <?php if ($currentUser): ?>
                 <?= navLink('Mon espace', '/dashboard', $currentUri) ?>
                 <?php if ($currentUser['role'] === 'admin'): ?>
