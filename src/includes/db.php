@@ -81,7 +81,45 @@ function initDB(PDO $pdo): void {
             FOREIGN KEY (panier_id) REFERENCES paniers(id) ON DELETE CASCADE,
             FOREIGN KEY (produit_id) REFERENCES produits(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS annonces (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titre TEXT NOT NULL,
+            texte TEXT DEFAULT '',
+            tag TEXT DEFAULT 'divers',
+            prix REAL DEFAULT NULL,
+            visible INTEGER NOT NULL DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS annonce_medias (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            annonce_id INTEGER NOT NULL,
+            fichier TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'photo',
+            position INTEGER NOT NULL DEFAULT 0,
+            FOREIGN KEY (annonce_id) REFERENCES annonces(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS annonce_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            annonce_id INTEGER NOT NULL,
+            nom TEXT NOT NULL,
+            email TEXT NOT NULL,
+            message TEXT NOT NULL,
+            lu INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (annonce_id) REFERENCES annonces(id) ON DELETE CASCADE
+        );
     ");
+
+    // Migrate: add meteo_code_insee to users if missing
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN meteo_code_insee TEXT DEFAULT '64430'");
+    } catch (\PDOException $e) {
+        // Column already exists — ignore
+    }
 
     // Default admin
     $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM users WHERE role = 'admin'");
@@ -102,6 +140,17 @@ function initDB(PDO $pdo): void {
     $ins = $pdo->prepare("INSERT OR IGNORE INTO pages (slug, title, content) VALUES (?, ?, '')");
     foreach ($seedPages as [$s, $t]) {
         $ins->execute([$s, $t]);
+    }
+
+    // Seed annonces
+    $aCount = (int)$pdo->query("SELECT COUNT(*) FROM annonces")->fetchColumn();
+    if ($aCount === 0) {
+        $insA = $pdo->prepare("INSERT INTO annonces (titre, texte, tag, prix, visible) VALUES (?, ?, ?, ?, 1)");
+        $insA->execute(['Tracteur John Deere 6130R', "Tracteur en bon état général, révisé en 2024. Cabine climatisée, chargeur frontal inclus. Nombreuses heures de travail mais bien entretenu. À voir sur place.", 'matériels', 45000]);
+        $insA->execute(['Lots de foin de prairie naturelle', "Foin de bonne qualité, 1ère coupe, en bottes rondes de 300 kg. Stocké sous abri. Disponible immédiatement, livraison possible dans un rayon de 30 km.", 'aliments', 35]);
+        $insA->execute(['2 brebis laitières Manech', "Brebis de race Manech tête rousse, 3 ans, bonnes productrices. Agnelage annuel régulier. Idéales pour fromage fermier. Vente groupée uniquement.", 'animaux', 280]);
+        $insA->execute(['Épandeur fumier Joskin 5000L', "Épandeur fumier à axe horizontal, bon état de fonctionnement. Pneus neufs posés en 2025. Quelques traces d'usure normales.", 'matériels', 8500]);
+        $insA->execute(['Agnelles Blanche du Massif Central', "Lot de 5 agnelles de 8 mois, prêtes à la reproduction. Race rustique, adaptation facile aux parcours difficiles. Certifiées Scrapie R/R.", 'animaux', 150]);
     }
 
     // Migrate legacy page.content → first HTML block (one-time)

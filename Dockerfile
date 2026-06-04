@@ -13,5 +13,9 @@ RUN chmod +x /entrypoint.sh
 
 WORKDIR /var/www/html
 
+# Source baked into the image for production.
+# In dev the docker-compose.yml volume mount overrides this.
+COPY src/ /var/www/html/
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]

@@ -36,4 +36,6 @@ include __DIR__ . '/../includes/header.php';
     </div>
     <p style="margin-top:.75rem;"><a href="/news" style="color:var(--primary); font-size:.88rem;">Toutes les actualit&eacute;s &rarr;</a></p>
 </div>
+
+
 <?php include __DIR__ . '/../includes/footer.php'; ?>

@@ -7,7 +7,7 @@ $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
 // Dynamic content pages (slug-based, editable via admin)
 $contentSlugs = ['eleveurs', 'filieres', 'oribase', 'adhesion'];
-if (in_array($uri, $contentSlugs) || $uri === '' || $uri === 'home') {
+if ($uri === '' || $uri === 'home' || in_array($uri, $contentSlugs)) {
     $slug = ($uri === '' || $uri === 'home') ? 'home' : $uri;
     include __DIR__ . '/pages/content.php';
     exit;
@@ -28,6 +28,11 @@ $routes = [
     'admin/produits'     => 'pages/admin/produits.php',
     'admin/produit-edit' => 'pages/admin/produit-edit.php',
     'admin/commandes'    => 'pages/admin/commandes.php',
+    'annonces'           => 'pages/annonces.php',
+    'annonce'            => 'pages/annonce.php',
+    'admin/annonces'     => 'pages/admin/annonces.php',
+    'admin/annonce-edit' => 'pages/admin/annonce-edit.php',
+    'api/meteo-set'      => 'pages/api/meteo-set.php',
 ];
 
 $page = isset($routes[$uri]) ? __DIR__ . '/' . $routes[$uri] : null;

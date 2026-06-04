@@ -1,0 +1,9 @@
+services:
+  web:
+    image: TON_USER_DOCKERHUB/elvea64-app:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8095:80"   # exposé uniquement en local, Apache fait le proxy
+    volumes:
+      - /srv/elvea64/data:/var/www/data       # base SQLite persistante
+      - /srv/elvea64/media:/var/www/html/media # uploads persistants
