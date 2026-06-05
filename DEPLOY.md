@@ -10,15 +10,13 @@
 
 ## 1. Build et push de l'image (machine de développement)
 
-Remplacer `toncompte` par l'identifiant DockerHub réel.
 
 ```bash
-docker build -t toncompte/elvea64-app:latest .
+docker build -t philippemlaroche/elvea64-app:latest .
 docker login
-docker push toncompte/elvea64-app:latest
+docker push philippemlaroche/elvea64-app:latest
 ```
 
-Mettre à jour `docker-compose.prod.yml` : remplacer `TON_USER_DOCKERHUB` par `toncompte`.
 
 ---
 
@@ -53,6 +51,11 @@ docker compose -f /srv/elvea64/docker-compose.prod.yml up -d
 ```
 
 Le conteneur écoute sur `127.0.0.1:8095` (non exposé publiquement).
+
+> **Données initiales** : au premier démarrage, si les volumes `/srv/elvea64/data` et
+> `/srv/elvea64/media` sont vides, le conteneur y copie automatiquement la base de données
+> et les médias qui ont été intégrés dans l'image au moment du build.
+> Lors des mises à jour suivantes, les volumes contiennent déjà des données → rien n'est écrasé.
 
 ---
 
@@ -106,8 +109,8 @@ Certbot modifie automatiquement la config Apache et met en place le renouvelleme
 Sur la machine de développement, après chaque modification :
 
 ```bash
-docker build -t toncompte/elvea64-app:latest .
-docker push toncompte/elvea64-app:latest
+docker build -t philippemlaroche/elvea64-app:latest .
+docker push philippemlaroche/elvea64-app:latest
 ```
 
 Sur le serveur :

@@ -1,6 +1,6 @@
 services:
   web:
-    image: TON_USER_DOCKERHUB/elvea64-app:latest
+    image: philippemlaroche/elvea64-app:latest
     restart: unless-stopped
     ports:
       - "127.0.0.1:8095:80"   # exposé uniquement en local, Apache fait le proxy

@@ -17,5 +17,9 @@ WORKDIR /var/www/html
 # In dev the docker-compose.yml volume mount overrides this.
 COPY src/ /var/www/html/
 
+# Initial data bundled as defaults — seeded on first run only (see entrypoint.sh).
+COPY data/   /var/www/data-init/
+COPY media/  /var/www/html/media-init/
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]
