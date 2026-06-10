@@ -19,9 +19,10 @@ function login(string $username, string $password): bool {
     }
 
     startSession();
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['role'] = $user['role'];
+    $_SESSION['user_id']          = $user['id'];
+    $_SESSION['username']         = $user['username'];
+    $_SESSION['role']             = $user['role'];
+    $_SESSION['exploitation_name'] = $user['exploitation_name'] ?? null;
 
     $token = bin2hex(random_bytes(32));
     $expires = date('Y-m-d H:i:s', time() + COOKIE_LIFETIME);
@@ -49,16 +50,17 @@ function getCurrentUser(): ?array {
 
     if (isset($_SESSION['user_id'])) {
         return [
-            'id'       => $_SESSION['user_id'],
-            'username' => $_SESSION['username'],
-            'role'     => $_SESSION['role'],
+            'id'               => $_SESSION['user_id'],
+            'username'         => $_SESSION['username'],
+            'role'             => $_SESSION['role'],
+            'exploitation_name' => $_SESSION['exploitation_name'] ?? null,
         ];
     }
 
     if (isset($_COOKIE['remember_token'])) {
         $db = getDB();
         $stmt = $db->prepare("
-            SELECT u.id, u.username, u.role FROM users u
+            SELECT u.id, u.username, u.role, u.exploitation_name FROM users u
             JOIN remember_tokens rt ON rt.user_id = u.id
             WHERE rt.token = ? AND rt.expires_at > datetime('now') AND u.active = 1
         ");
@@ -66,9 +68,10 @@ function getCurrentUser(): ?array {
         $user = $stmt->fetch();
 
         if ($user) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
+            $_SESSION['user_id']           = $user['id'];
+            $_SESSION['username']          = $user['username'];
+            $_SESSION['role']              = $user['role'];
+            $_SESSION['exploitation_name'] = $user['exploitation_name'] ?? null;
             return $user;
         }
 

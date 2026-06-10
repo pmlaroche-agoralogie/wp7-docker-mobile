@@ -4,7 +4,7 @@ Il faut, derreire l'accès utilisateur, une bibliothèque de gestion de fichiers
  La gestion des fichiers doit être organisée pour être appelé par API, avec un points d'entrée public_html/api/put_user_file.php` appelé par des partenaires pour déposer des fichiers
 
 
-un fichier appartient à un utilisateur, dont l'uid est par la tables de utilisateurs du site, et 
+un fichier appartient à un utilisateur, dont l'uid est donné par la tables de utilisateurs du site, et 
 à un groupe, listé dans une table files_bo_groups, par defaut le groupe est l'uid du propriétaire
 
 stockage des fichiers : 
@@ -20,8 +20,13 @@ Un fichier dont le nom commence par 3b sera ecrit dans le sous-repertoire 3/b/no
 A partir de cette bibliotheque, il faut proposer dans l'interface web :
  accès, pour un utilisateur authentifié, dans la partie contenu de la page, à la liste de ses repertoires et fichiers,
   comme dans l'explorateur de fichier windows, qui par defaut montre le sous-repertoire virtuel "/" .
-Ssi l'utilisateur fait partie de groupes, il pourra aussi choisir un groupe et ensuite naviguer de la meme manière dedans
-Sur l' ecran de base , on peut : 
+
+
+On aura deux modules d'entrées : un module "fichiers" , qui permet d'acceder aux fichiers personnels, et un module "Fichiers groupes" pour tous ce qui est destinés à un groupe.
+
+Si l'utilisateur fait partie de groupes, dans le module "Fichiers groupes" , il pourra aussi choisir un groupe et ensuite naviguer de la meme manière dedans
+
+Sur l' ecran de base d'un moduel , on peut : 
 donwload un fichier dans la liste, 
 upload un fichier dans le repertoire courant, 
 supprimer un fichier (avec un warning), 

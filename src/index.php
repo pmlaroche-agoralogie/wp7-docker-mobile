@@ -40,10 +40,15 @@ $routes = [
     'admin/annonce-edit' => 'pages/admin/annonce-edit.php',
     'api/meteo-set'      => 'pages/api/meteo-set.php',
     'admin/cotations'    => 'pages/admin/cotations.php',
-    'messages'           => 'pages/messages.php',
-    'message'            => 'pages/message.php',
-    'admin/messages'     => 'pages/admin/messages.php',
-    'admin/message-new'  => 'pages/admin/message-new.php',
+    'messages'               => 'pages/messages.php',
+    'message'                => 'pages/message.php',
+    'admin/messages'         => 'pages/admin/messages.php',
+    'admin/message-new'      => 'pages/admin/message-new.php',
+    'admin/fichiers-groupes' => 'pages/admin/fichiers-groupes.php',
+    'fichiers'               => 'pages/fichiers.php',
+    'fichiers-groupes'       => 'pages/fichiers-groupes.php',
+    'fichiers-dl'            => 'pages/fichiers-dl.php',
+    'api/put_user_file'      => 'pages/api/put_user_file.php',
 ];
 
 $page = isset($routes[$uri]) ? __DIR__ . '/' . $routes[$uri] : null;

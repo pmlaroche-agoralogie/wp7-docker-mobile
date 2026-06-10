@@ -112,6 +112,7 @@ Sur la machine de développement, après chaque modification :
 docker build -t philippemlaroche/elvea64-app:latest .
 docker push philippemlaroche/elvea64-app:latest
 ```
+ou en une ligne docker build -t philippemlaroche/elvea64-app:latest .; docker push philippemlaroche/elvea64-app:latest
 
 Sur le serveur :
 

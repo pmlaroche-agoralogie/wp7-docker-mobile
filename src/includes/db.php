@@ -151,6 +151,36 @@ function initDB(PDO $pdo): void {
             mime_type TEXT NOT NULL DEFAULT 'application/octet-stream',
             FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS files_bo_groups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS files_bo_group_members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            FOREIGN KEY (group_id) REFERENCES files_bo_groups(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(group_id, user_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS files_bo_name (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            stored_name TEXT NOT NULL UNIQUE,
+            original_name TEXT NOT NULL,
+            virtual_path TEXT NOT NULL DEFAULT '/',
+            owner_id INTEGER NOT NULL,
+            group_id INTEGER DEFAULT NULL,
+            mime_type TEXT DEFAULT 'application/octet-stream',
+            file_size INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (group_id) REFERENCES files_bo_groups(id) ON DELETE SET NULL
+        );
     ");
 
     // Migrate: add meteo_code_insee to users if missing
@@ -161,6 +191,24 @@ function initDB(PDO $pdo): void {
     // Migrate: add group_name to users if missing
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN group_name TEXT DEFAULT NULL");
+    } catch (\PDOException $e) {}
+
+    // Migrate: add lieu and phone_vendeur to annonces if missing
+    try {
+        $pdo->exec("ALTER TABLE annonces ADD COLUMN lieu TEXT DEFAULT NULL");
+    } catch (\PDOException $e) {}
+    try {
+        $pdo->exec("ALTER TABLE annonces ADD COLUMN phone_vendeur TEXT DEFAULT NULL");
+    } catch (\PDOException $e) {}
+
+    // Migrate: add exploitation_name to users if missing
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN exploitation_name TEXT DEFAULT NULL");
+    } catch (\PDOException $e) {}
+
+    // Migrate: add phone to users if missing
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN phone TEXT DEFAULT NULL");
     } catch (\PDOException $e) {}
 
     // Default admin

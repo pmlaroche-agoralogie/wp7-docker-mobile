@@ -42,12 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Save annonce
-    $titre   = trim($_POST['titre']   ?? '');
-    $texte   = trim($_POST['texte']   ?? '');
-    $tag     = $_POST['tag']          ?? 'divers';
-    $prixRaw = str_replace(',', '.', trim($_POST['prix'] ?? ''));
-    $prix    = $prixRaw !== '' && is_numeric($prixRaw) ? (float)$prixRaw : null;
-    $visible = isset($_POST['visible']) ? 1 : 0;
+    $titre        = trim($_POST['titre']         ?? '');
+    $texte        = trim($_POST['texte']         ?? '');
+    $tag          = $_POST['tag']               ?? 'divers';
+    $prixRaw      = str_replace(',', '.', trim($_POST['prix'] ?? ''));
+    $prix         = $prixRaw !== '' && is_numeric($prixRaw) ? (float)$prixRaw : null;
+    $lieu         = trim($_POST['lieu']         ?? '') ?: null;
+    $phoneVendeur = trim($_POST['phone_vendeur'] ?? '') ?: null;
+    $visible      = isset($_POST['visible']) ? 1 : 0;
 
     if (!in_array($tag, ANNONCE_TAGS)) $tag = 'divers';
     if ($titre === '') $errors[] = 'Le titre est obligatoire.';
@@ -86,11 +88,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         if ($annonce) {
-            $db->prepare("UPDATE annonces SET titre=?, texte=?, tag=?, prix=?, visible=?, updated_at=datetime('now') WHERE id=?")
-               ->execute([$titre, $texte, $tag, $prix, $visible, $id]);
+            $db->prepare("UPDATE annonces SET titre=?, texte=?, tag=?, prix=?, lieu=?, phone_vendeur=?, visible=?, updated_at=datetime('now') WHERE id=?")
+               ->execute([$titre, $texte, $tag, $prix, $lieu, $phoneVendeur, $visible, $id]);
         } else {
-            $db->prepare("INSERT INTO annonces (titre, texte, tag, prix, visible) VALUES (?, ?, ?, ?, ?)")
-               ->execute([$titre, $texte, $tag, $prix, $visible]);
+            $db->prepare("INSERT INTO annonces (titre, texte, tag, prix, lieu, phone_vendeur, visible) VALUES (?, ?, ?, ?, ?, ?, ?)")
+               ->execute([$titre, $texte, $tag, $prix, $lieu, $phoneVendeur, $visible]);
             $id = (int)$db->lastInsertId();
         }
 
@@ -107,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Reconstituer pour réaffichage
-    $annonce = ['id' => $id, 'titre' => $titre, 'texte' => $texte, 'tag' => $tag, 'prix' => $prix, 'visible' => $visible];
+    $annonce = ['id' => $id, 'titre' => $titre, 'texte' => $texte, 'tag' => $tag, 'prix' => $prix, 'lieu' => $lieu, 'phone_vendeur' => $phoneVendeur, 'visible' => $visible];
 }
 
 // Médias existants
@@ -158,6 +160,19 @@ include __DIR__ . '/../../includes/header.php';
                 <input type="text" id="prix" name="prix" inputmode="decimal" style="max-width:180px;"
                        placeholder="Laisser vide = prix sur demande"
                        value="<?= $annonce['prix'] !== null ? htmlspecialchars(number_format((float)($annonce['prix'] ?? 0), 2, '.', '')) : '' ?>">
+            </div>
+        </div>
+
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <div class="form-group" style="flex:1; min-width:160px;">
+                <label for="lieu">Lieu</label>
+                <input type="text" id="lieu" name="lieu" placeholder="Ex. : Orthez (64)"
+                       value="<?= htmlspecialchars($annonce['lieu'] ?? '') ?>">
+            </div>
+            <div class="form-group" style="flex:1; min-width:160px;">
+                <label for="phone_vendeur">T&eacute;l&eacute;phone du vendeur</label>
+                <input type="tel" id="phone_vendeur" name="phone_vendeur" placeholder="06 00 00 00 00"
+                       value="<?= htmlspecialchars($annonce['phone_vendeur'] ?? '') ?>">
             </div>
         </div>
 

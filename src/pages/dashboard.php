@@ -27,7 +27,7 @@ $dashMsgStmt = $db->prepare("
     SELECT m.id, m.subject, m.created_at, mr.read_at
     FROM messages m
     JOIN message_recipients mr ON mr.message_id = m.id AND mr.user_id = ?
-    ORDER BY m.created_at DESC LIMIT 3
+    ORDER BY m.created_at DESC LIMIT 1
 ");
 $dashMsgStmt->execute([$user['id']]);
 $dashMessages = $dashMsgStmt->fetchAll();
@@ -43,7 +43,7 @@ if ($user['role'] === 'admin') {
 }
 
 $recentAnnonces = $db->query(
-    "SELECT id, titre, texte, tag, prix, created_at FROM annonces WHERE visible = 1 ORDER BY created_at DESC LIMIT 3"
+    "SELECT id, titre, texte, tag, prix, created_at FROM annonces WHERE visible = 1 ORDER BY created_at DESC LIMIT 1"
 )->fetchAll();
 
 $tagColors = [
@@ -56,49 +56,40 @@ $tagColors = [
 
 include __DIR__ . '/../includes/header.php';
 ?>
-<h1 class="page-title">Bonjour, <?= htmlspecialchars($user['username']) ?></h1>
-
 <div class="module-grid">
 
     <div class="module-card" style="cursor:default;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem;">
             <div style="display:flex; align-items:center; gap:.5rem;">
                 <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#9993;</span>
                 <h3 style="margin:0;">Messagerie</h3>
+                <?php if ($unreadCount > 0): ?>
+                    <span style="background:#ef4444; color:#fff; border-radius:999px; padding:.1rem .45rem; font-size:.68rem; font-weight:700;">
+                        <?= $unreadCount ?>
+                    </span>
+                <?php endif; ?>
             </div>
-            <?php if ($unreadCount > 0): ?>
-                <span style="background:#ef4444; color:#fff; border-radius:999px; padding:.15rem .55rem; font-size:.72rem; font-weight:700;">
-                    <?= $unreadCount ?> non lu<?= $unreadCount > 1 ? 's' : '' ?>
-                </span>
-            <?php endif; ?>
+            <a href="/messages" style="font-size:.78rem; color:var(--primary); text-decoration:none; white-space:nowrap;">Tous &rarr;</a>
         </div>
         <?php if (empty($dashMessages)): ?>
             <p style="color:var(--muted); font-size:.82rem; font-style:italic;">Aucun message re&ccedil;u.</p>
         <?php else: ?>
-            <?php foreach ($dashMessages as $msg): ?>
-                <?php $unread = !$msg['read_at']; ?>
-                <a href="/message?id=<?= $msg['id'] ?>"
-                   style="display:block; padding:.4rem 0; text-decoration:none; color:inherit;
-                          border-bottom:1px solid var(--border); font-size:.84rem;">
-                    <div style="<?= $unread ? 'font-weight:700;' : '' ?> display:flex; align-items:center; gap:.4rem; overflow:hidden;">
-                        <?php if ($unread): ?>
-                            <span style="width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0;"></span>
-                        <?php else: ?>
-                            <span style="width:7px; flex-shrink:0;"></span>
-                        <?php endif; ?>
-                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
-                            <?= htmlspecialchars($msg['subject']) ?>
-                        </span>
-                    </div>
-                    <div style="font-size:.73rem; color:var(--muted); margin-left:1.1rem;">
-                        <?= date('d/m/Y', strtotime($msg['created_at'])) ?>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+            <?php $msg = $dashMessages[0]; $unread = !$msg['read_at']; ?>
+            <a href="/message?id=<?= $msg['id'] ?>"
+               style="display:flex; align-items:center; gap:.4rem; text-decoration:none; color:inherit; font-size:.84rem; overflow:hidden;">
+                <?php if ($unread): ?>
+                    <span style="width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0;"></span>
+                <?php else: ?>
+                    <span style="width:7px; flex-shrink:0;"></span>
+                <?php endif; ?>
+                <span style="<?= $unread ? 'font-weight:700;' : '' ?> overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+                    <?= htmlspecialchars($msg['subject']) ?>
+                </span>
+                <span style="font-size:.73rem; color:var(--muted); flex-shrink:0;">
+                    <?= date('d/m', strtotime($msg['created_at'])) ?>
+                </span>
+            </a>
         <?php endif; ?>
-        <a href="/messages" style="display:block; text-align:right; font-size:.78rem; color:var(--primary); text-decoration:none; margin-top:.5rem;">
-            Tous les messages &rarr;
-        </a>
     </div>
 
     <div class="module-card" style="cursor:default;">
@@ -122,7 +113,7 @@ include __DIR__ . '/../includes/header.php';
     <div class="module-card" style="cursor:default;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
             <div style="display:flex; align-items:center; gap:.5rem;">
-                <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128226;</span>
+                <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128668;</span>
                 <h3 style="margin:0;">Annonces</h3>
             </div>
             <a href="/annonces" style="font-size:.78rem; color:var(--primary); text-decoration:none; white-space:nowrap;">Toutes &rarr;</a>
@@ -151,15 +142,24 @@ include __DIR__ . '/../includes/header.php';
     </div>
 
     <div class="module-card" onclick="location.href='/produits'">
-        <div class="mod-icon">&#127807;</div>
-        <h3>Boutique</h3>
-        <p>Fourni directement par votre op</p>
+        <div style="display:flex; align-items:center; gap:.5rem;">
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#127807;</span>
+            <h3 style="margin:0;">Boutique</h3>
+        </div>
     </div>
 
-    <div class="module-card">
-        <div class="mod-icon">&#128193;</div>
-        <h3>Fichiers</h3>
-        <p>Les 3 derniers fichiers disponibles</p>
+    <div class="module-card" onclick="location.href='/fichiers'">
+        <div style="display:flex; align-items:center; gap:.5rem;">
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128193;</span>
+            <h3 style="margin:0;">Fichiers</h3>
+        </div>
+    </div>
+
+    <div class="module-card" onclick="location.href='/fichiers-groupes'">
+        <div style="display:flex; align-items:center; gap:.5rem;">
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128101;</span>
+            <h3 style="margin:0;">Fichiers de groupes</h3>
+        </div>
     </div>
 
     <div class="module-card meteo-card" style="cursor:default;">
@@ -291,6 +291,18 @@ include __DIR__ . '/../includes/header.php';
         <div class="mod-icon">&#128196;</div>
         <h3>Cotations</h3>
         <p>Gestion des PDF de cotations march&eacute;</p>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/annonces'">
+        <div class="mod-icon">&#128668;</div>
+        <h3>Annonces</h3>
+        <p>Gestion des petites annonces &eacute;leveurs</p>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/fichiers-groupes'">
+        <div class="mod-icon">&#128101;</div>
+        <h3>Groupes de fichiers</h3>
+        <p>Cr&eacute;er des groupes, g&eacute;rer les membres</p>
     </div>
 
     <div class="module-card" onclick="location.href='/admin/messages'" style="position:relative;">

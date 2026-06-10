@@ -52,11 +52,8 @@ $pageTitle = 'Petites annonces — ' . SITE_NAME;
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;">
+<div style="margin-bottom:1rem;">
     <h1 class="page-title" style="margin:0;">Petites annonces</h1>
-    <?php if (isAdmin()): ?>
-        <a href="/admin/annonces" class="btn btn-sm" style="margin-left:auto;">&#9998; Gérer les annonces</a>
-    <?php endif; ?>
 </div>
 
 <form method="get" class="annonces-filters">

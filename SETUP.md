@@ -137,6 +137,12 @@ make shell   # Ouvrir un shell dans le conteneur
 make down    # Arrêter et supprimer le conteneur
 ```
 
+Commande shell directe (équivalent à `make shell`) :
+
+```bash
+docker compose exec web bash
+```
+
 Site disponible sur **http://localhost:8095**.
 
 `src/` est monté en volume live : toute modification PHP est prise en compte immédiatement, sans rebuild.

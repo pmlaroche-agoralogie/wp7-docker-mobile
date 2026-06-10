@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y libsqlite3-dev \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /var/www/data
+RUN mkdir -p /var/www/data /var/www/files_upload
 
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 COPY entrypoint.sh /entrypoint.sh

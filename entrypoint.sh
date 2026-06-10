@@ -15,4 +15,6 @@ chown -R www-data:www-data /var/www/html/media 2>/dev/null || true
 mkdir -p /var/www/html/uploads/produits
 mkdir -p /var/www/html/uploads/messages
 chown -R www-data:www-data /var/www/html/uploads 2>/dev/null || true
+mkdir -p /var/www/files_upload
+chown -R www-data:www-data /var/www/files_upload 2>/dev/null || true
 exec "$@"

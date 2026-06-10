@@ -7,3 +7,4 @@ services:
       - ./src:/var/www/html
       - ./media:/var/www/html/media
       - ./data:/var/www/data
+      - ./files_upload:/var/www/files_upload

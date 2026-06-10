@@ -31,27 +31,6 @@ $tagColors = [
 ];
 $tc = $tagColors[$annonce['tag']] ?? $tagColors['divers'];
 
-$msgSuccess = false;
-$msgErrors  = [];
-
-$currentUser = getCurrentUser();
-$userRow     = $db->prepare("SELECT email FROM users WHERE id = ?");
-$userRow->execute([$currentUser['id']]);
-$userEmail = (string)($userRow->fetchColumn() ?: '');
-
-// ── POST : envoi message ──────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $message = trim($_POST['message'] ?? '');
-
-    if ($message === '') $msgErrors[] = 'Le message ne peut pas être vide.';
-
-    if (empty($msgErrors)) {
-        $db->prepare("INSERT INTO annonce_messages (annonce_id, nom, email, message) VALUES (?, ?, ?, ?)")
-           ->execute([$id, $currentUser['username'], $userEmail, $message]);
-        $msgSuccess = true;
-    }
-}
-
 $pageTitle = htmlspecialchars($annonce['titre']) . ' — ' . SITE_NAME;
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -66,7 +45,7 @@ include __DIR__ . '/../includes/header.php';
             <?= htmlspecialchars($annonce['tag']) ?>
         </span>
         <?php if ($annonce['prix'] !== null): ?>
-            <span class="annonce-prix"><?= number_format((float)$annonce['prix'], 2, ',', '&thinsp;') ?>&thinsp;&euro;</span>
+            <span class="annonce-prix"><?= number_format((float)$annonce['prix'], 2, ',', '&thinsp;') ?>&thinsp;&euro; <span style="font-size:.7em; font-weight:600; vertical-align:middle;">HT</span></span>
         <?php else: ?>
             <span style="color:var(--muted);">Prix sur demande</span>
         <?php endif; ?>
@@ -74,6 +53,17 @@ include __DIR__ . '/../includes/header.php';
     </div>
 
     <h1 class="page-title" style="margin-bottom:.85rem;"><?= htmlspecialchars($annonce['titre']) ?></h1>
+
+    <?php if (!empty($annonce['lieu']) || !empty($annonce['phone_vendeur'])): ?>
+    <div style="display:flex; flex-wrap:wrap; gap:.75rem 1.5rem; margin-bottom:1rem; font-size:.92rem; color:var(--muted);">
+        <?php if (!empty($annonce['lieu'])): ?>
+            <span>&#128205; <?= htmlspecialchars($annonce['lieu']) ?></span>
+        <?php endif; ?>
+        <?php if (!empty($annonce['phone_vendeur'])): ?>
+            <span>&#128222; <a href="tel:<?= htmlspecialchars($annonce['phone_vendeur']) ?>" style="color:inherit;"><?= htmlspecialchars($annonce['phone_vendeur']) ?></a></span>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
     <?php if (!empty($medias)): ?>
     <div class="annonce-medias-grid"
@@ -99,30 +89,6 @@ include __DIR__ . '/../includes/header.php';
     <?php endif; ?>
 
     <div class="content-body" style="white-space:pre-wrap;"><?= htmlspecialchars($annonce['texte']) ?></div>
-</div>
-
-<div class="card">
-    <h2>Contacter l&rsquo;annonceur</h2>
-    <?php if ($msgSuccess): ?>
-        <div class="alert alert-success">Votre message a bien &eacute;t&eacute; envoy&eacute;. L&rsquo;administrateur vous recontactera.</div>
-    <?php else: ?>
-        <p style="font-size:.85rem; color:var(--muted); margin-bottom:.75rem;">
-            Message envoy&eacute; en tant que <strong><?= htmlspecialchars($currentUser['username']) ?></strong>
-            <?php if ($userEmail !== ''): ?>(<?= htmlspecialchars($userEmail) ?>)<?php endif; ?>
-        </p>
-        <?php foreach ($msgErrors as $e): ?>
-            <div class="alert alert-error"><?= htmlspecialchars($e) ?></div>
-        <?php endforeach; ?>
-        <form method="post">
-            <div class="form-group">
-                <label for="msg-message">Votre message <span style="color:red;">*</span></label>
-                <textarea id="msg-message" name="message" rows="5"
-                          style="width:100%; padding:.65rem .9rem; border:1px solid var(--border); border-radius:8px; font-size:.95rem; font-family:inherit; resize:vertical;"
-                          required><?= htmlspecialchars($_POST['message'] ?? '') ?></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Envoyer le message</button>
-        </form>
-    <?php endif; ?>
 </div>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
