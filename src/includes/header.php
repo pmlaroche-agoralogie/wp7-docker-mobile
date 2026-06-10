@@ -13,6 +13,9 @@ function navLink(string $label, string $href, string $uri): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? SITE_NAME) ?></title>
+    <meta name="apple-mobile-web-app-title" content="ELVEA">
+    <meta name="application-name" content="ELVEA">
+    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/assets/css/style.css">
     <?php if (isset($extraHead)) echo $extraHead; ?>
 </head>

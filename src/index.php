@@ -5,6 +5,12 @@ require_once __DIR__ . '/includes/auth.php';
 
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
+// Redirect authenticated users from home to dashboard
+if (($uri === '' || $uri === 'home') && isLoggedIn()) {
+    header('Location: /dashboard');
+    exit;
+}
+
 // Dynamic content pages (slug-based, editable via admin)
 $contentSlugs = ['eleveurs', 'filieres', 'oribase', 'adhesion'];
 if ($uri === '' || $uri === 'home' || in_array($uri, $contentSlugs)) {
@@ -33,6 +39,11 @@ $routes = [
     'admin/annonces'     => 'pages/admin/annonces.php',
     'admin/annonce-edit' => 'pages/admin/annonce-edit.php',
     'api/meteo-set'      => 'pages/api/meteo-set.php',
+    'admin/cotations'    => 'pages/admin/cotations.php',
+    'messages'           => 'pages/messages.php',
+    'message'            => 'pages/message.php',
+    'admin/messages'     => 'pages/admin/messages.php',
+    'admin/message-new'  => 'pages/admin/message-new.php',
 ];
 
 $page = isset($routes[$uri]) ? __DIR__ . '/' . $routes[$uri] : null;

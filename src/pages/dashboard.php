@@ -8,6 +8,40 @@ $meteoRow = $db->prepare("SELECT meteo_code_insee FROM users WHERE id = ?");
 $meteoRow->execute([$user['id']]);
 $meteoCodeInsee = $meteoRow->fetchColumn() ?: '64430';
 
+// Find the most recently modified PDF in media/cotations/
+$cotationsDir = '/var/www/html/media/cotations';
+$latestPdf = null;
+$latestPdfTime = 0;
+if (is_dir($cotationsDir)) {
+    foreach (glob($cotationsDir . '/*.pdf') as $file) {
+        $mtime = filemtime($file);
+        if ($mtime > $latestPdfTime) {
+            $latestPdfTime = $mtime;
+            $latestPdf = basename($file);
+        }
+    }
+}
+
+// Messagerie : 3 derniers messages + compteur non lus
+$dashMsgStmt = $db->prepare("
+    SELECT m.id, m.subject, m.created_at, mr.read_at
+    FROM messages m
+    JOIN message_recipients mr ON mr.message_id = m.id AND mr.user_id = ?
+    ORDER BY m.created_at DESC LIMIT 3
+");
+$dashMsgStmt->execute([$user['id']]);
+$dashMessages = $dashMsgStmt->fetchAll();
+
+$unreadCountStmt = $db->prepare("SELECT COUNT(*) FROM message_recipients WHERE user_id = ? AND read_at IS NULL");
+$unreadCountStmt->execute([$user['id']]);
+$unreadCount = (int)$unreadCountStmt->fetchColumn();
+
+// Admin : compteur réponses non lues
+$adminUnreadReplies = 0;
+if ($user['role'] === 'admin') {
+    $adminUnreadReplies = (int)$db->query("SELECT COUNT(*) FROM message_replies WHERE read_by_admin = 0")->fetchColumn();
+}
+
 $recentAnnonces = $db->query(
     "SELECT id, titre, texte, tag, prix, created_at FROM annonces WHERE visible = 1 ORDER BY created_at DESC LIMIT 3"
 )->fetchAll();
@@ -26,10 +60,63 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="module-grid">
 
-    <div class="module-card">
-        <div class="mod-icon">&#128203;</div>
-        <h3>Activit&eacute;s</h3>
-        <p>Pr&eacute;sentation des activit&eacute;s r&eacute;centes dans l'intranet</p>
+    <div class="module-card" style="cursor:default;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
+            <div style="display:flex; align-items:center; gap:.5rem;">
+                <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#9993;</span>
+                <h3 style="margin:0;">Messagerie</h3>
+            </div>
+            <?php if ($unreadCount > 0): ?>
+                <span style="background:#ef4444; color:#fff; border-radius:999px; padding:.15rem .55rem; font-size:.72rem; font-weight:700;">
+                    <?= $unreadCount ?> non lu<?= $unreadCount > 1 ? 's' : '' ?>
+                </span>
+            <?php endif; ?>
+        </div>
+        <?php if (empty($dashMessages)): ?>
+            <p style="color:var(--muted); font-size:.82rem; font-style:italic;">Aucun message re&ccedil;u.</p>
+        <?php else: ?>
+            <?php foreach ($dashMessages as $msg): ?>
+                <?php $unread = !$msg['read_at']; ?>
+                <a href="/message?id=<?= $msg['id'] ?>"
+                   style="display:block; padding:.4rem 0; text-decoration:none; color:inherit;
+                          border-bottom:1px solid var(--border); font-size:.84rem;">
+                    <div style="<?= $unread ? 'font-weight:700;' : '' ?> display:flex; align-items:center; gap:.4rem; overflow:hidden;">
+                        <?php if ($unread): ?>
+                            <span style="width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0;"></span>
+                        <?php else: ?>
+                            <span style="width:7px; flex-shrink:0;"></span>
+                        <?php endif; ?>
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+                            <?= htmlspecialchars($msg['subject']) ?>
+                        </span>
+                    </div>
+                    <div style="font-size:.73rem; color:var(--muted); margin-left:1.1rem;">
+                        <?= date('d/m/Y', strtotime($msg['created_at'])) ?>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        <a href="/messages" style="display:block; text-align:right; font-size:.78rem; color:var(--primary); text-decoration:none; margin-top:.5rem;">
+            Tous les messages &rarr;
+        </a>
+    </div>
+
+    <div class="module-card" style="cursor:default;">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem;">
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128196;</span>
+            <h3 style="margin:0;">Cotations</h3>
+        </div>
+        <?php if ($latestPdf): ?>
+            <a href="/media/cotations/<?= rawurlencode($latestPdf) ?>" target="_blank" rel="noopener"
+               style="display:flex; align-items:center; gap:.5rem; text-decoration:none; color:var(--primary);
+                      padding:.5rem .6rem; border:1px solid var(--border); border-radius:8px;
+                      font-size:.85rem; word-break:break-word;">
+                <span style="font-size:1.2rem;">&#128462;</span>
+                <?= htmlspecialchars($latestPdf) ?>
+            </a>
+        <?php else: ?>
+            <p style="color:var(--muted); font-size:.82rem; font-style:italic;">Aucune cotation disponible.</p>
+        <?php endif; ?>
     </div>
 
     <div class="module-card" style="cursor:default;">
@@ -63,16 +150,16 @@ include __DIR__ . '/../includes/header.php';
         <?php endif; ?>
     </div>
 
+    <div class="module-card" onclick="location.href='/produits'">
+        <div class="mod-icon">&#127807;</div>
+        <h3>Boutique</h3>
+        <p>Fourni directement par votre op</p>
+    </div>
+
     <div class="module-card">
         <div class="mod-icon">&#128193;</div>
         <h3>Fichiers</h3>
         <p>Les 3 derniers fichiers disponibles</p>
-    </div>
-
-    <div class="module-card">
-        <div class="mod-icon">&#9993;</div>
-        <h3>Messagerie</h3>
-        <p>Vos derniers messages re&ccedil;us</p>
     </div>
 
     <div class="module-card meteo-card" style="cursor:default;">
@@ -174,12 +261,6 @@ include __DIR__ . '/../includes/header.php';
     }
     </script>
 
-    <div class="module-card" onclick="location.href='/produits'">
-        <div class="mod-icon">&#128722;</div>
-        <h3>Commandes</h3>
-        <p>Catalogue de produits et panier de commandes</p>
-    </div>
-
     <?php if ($user['role'] === 'admin'): ?>
 
     <div class="module-card" onclick="location.href='/admin/users'">
@@ -204,6 +285,25 @@ include __DIR__ . '/../includes/header.php';
         <div class="mod-icon">&#128203;</div>
         <h3>Commandes re&ccedil;ues</h3>
         <p>Suivi et livraison des commandes &eacute;leveurs</p>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/cotations'">
+        <div class="mod-icon">&#128196;</div>
+        <h3>Cotations</h3>
+        <p>Gestion des PDF de cotations march&eacute;</p>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/messages'" style="position:relative;">
+        <div class="mod-icon">&#9993;</div>
+        <h3>Messagerie</h3>
+        <p>Envoyer des messages, consulter les r&eacute;ponses</p>
+        <?php if ($adminUnreadReplies > 0): ?>
+            <div style="margin-top:.4rem;">
+                <span style="background:#ef4444; color:#fff; border-radius:999px; padding:.15rem .55rem; font-size:.72rem; font-weight:700;">
+                    <?= $adminUnreadReplies ?> r&eacute;ponse<?= $adminUnreadReplies > 1 ? 's' : '' ?> non lue<?= $adminUnreadReplies > 1 ? 's' : '' ?>
+                </span>
+            </div>
+        <?php endif; ?>
     </div>
 
     <?php endif; ?>

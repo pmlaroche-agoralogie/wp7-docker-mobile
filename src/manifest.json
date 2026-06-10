@@ -1,0 +1,15 @@
+{
+  "name": "ELVEA Béarn-Pays Basque-Landes",
+  "short_name": "ELVEA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/media/logo-elvea64.jpg",
+      "sizes": "any",
+      "type": "image/jpeg"
+    }
+  ]
+}

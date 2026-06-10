@@ -112,14 +112,56 @@ function initDB(PDO $pdo): void {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (annonce_id) REFERENCES annonces(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender_id INTEGER NOT NULL,
+            subject TEXT NOT NULL,
+            body TEXT NOT NULL DEFAULT '',
+            created_at DATETIME DEFAULT (datetime('now')),
+            FOREIGN KEY (sender_id) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS message_recipients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            read_at DATETIME DEFAULT NULL,
+            FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(message_id, user_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS message_replies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id INTEGER NOT NULL,
+            sender_id INTEGER NOT NULL,
+            body TEXT NOT NULL,
+            created_at DATETIME DEFAULT (datetime('now')),
+            read_by_admin INTEGER NOT NULL DEFAULT 0,
+            FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+            FOREIGN KEY (sender_id) REFERENCES users(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS message_attachments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            original_name TEXT NOT NULL,
+            mime_type TEXT NOT NULL DEFAULT 'application/octet-stream',
+            FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+        );
     ");
 
     // Migrate: add meteo_code_insee to users if missing
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN meteo_code_insee TEXT DEFAULT '64430'");
-    } catch (\PDOException $e) {
-        // Column already exists — ignore
-    }
+    } catch (\PDOException $e) {}
+
+    // Migrate: add group_name to users if missing
+    try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN group_name TEXT DEFAULT NULL");
+    } catch (\PDOException $e) {}
 
     // Default admin
     $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM users WHERE role = 'admin'");
