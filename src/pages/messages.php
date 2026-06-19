@@ -4,6 +4,8 @@ $user = getCurrentUser();
 $db   = getDB();
 $pageTitle = 'Messagerie — ' . SITE_NAME;
 
+recordPageVisit($user['id'], 'messages');
+
 $stmt = $db->prepare("
     SELECT m.id, m.subject, m.created_at, mr.read_at,
            u.username AS sender_name,

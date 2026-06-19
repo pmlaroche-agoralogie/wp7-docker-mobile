@@ -1,6 +1,9 @@
 <?php
 requireLogin();
-$db = getDB();
+$user = getCurrentUser();
+$db   = getDB();
+
+recordPageVisit($user['id'], 'annonces');
 
 $tagColors = [
     'matériels' => ['bg' => '#dbeafe', 'color' => '#1d4ed8'],

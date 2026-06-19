@@ -8,137 +8,92 @@ $meteoRow = $db->prepare("SELECT meteo_code_insee FROM users WHERE id = ?");
 $meteoRow->execute([$user['id']]);
 $meteoCodeInsee = $meteoRow->fetchColumn() ?: '64430';
 
-// Find the most recently modified PDF in media/cotations/
-$cotationsDir = '/var/www/html/media/cotations';
-$latestPdf = null;
-$latestPdfTime = 0;
-if (is_dir($cotationsDir)) {
-    foreach (glob($cotationsDir . '/*.pdf') as $file) {
-        $mtime = filemtime($file);
-        if ($mtime > $latestPdfTime) {
-            $latestPdfTime = $mtime;
-            $latestPdf = basename($file);
-        }
-    }
-}
-
-// Messagerie : 3 derniers messages + compteur non lus
-$dashMsgStmt = $db->prepare("
-    SELECT m.id, m.subject, m.created_at, mr.read_at
-    FROM messages m
-    JOIN message_recipients mr ON mr.message_id = m.id AND mr.user_id = ?
-    ORDER BY m.created_at DESC LIMIT 1
-");
-$dashMsgStmt->execute([$user['id']]);
-$dashMessages = $dashMsgStmt->fetchAll();
-
-$unreadCountStmt = $db->prepare("SELECT COUNT(*) FROM message_recipients WHERE user_id = ? AND read_at IS NULL");
-$unreadCountStmt->execute([$user['id']]);
-$unreadCount = (int)$unreadCountStmt->fetchColumn();
-
 // Admin : compteur réponses non lues
 $adminUnreadReplies = 0;
 if ($user['role'] === 'admin') {
     $adminUnreadReplies = (int)$db->query("SELECT COUNT(*) FROM message_replies WHERE read_by_admin = 0")->fetchColumn();
 }
 
-$recentAnnonces = $db->query(
-    "SELECT id, titre, texte, tag, prix, created_at FROM annonces WHERE visible = 1 ORDER BY created_at DESC LIMIT 1"
-)->fetchAll();
+// --- Points rouges : nouveautés depuis le dernier passage ---
 
-$tagColors = [
-    'matériels' => ['bg' => '#dbeafe', 'color' => '#1d4ed8'],
-    'aliments'  => ['bg' => '#dcfce7', 'color' => '#15803d'],
-    'animaux'   => ['bg' => '#fef9c3', 'color' => '#a16207'],
-    'services'  => ['bg' => '#ede9fe', 'color' => '#6d28d9'],
-    'divers'    => ['bg' => '#f1f5f9', 'color' => '#475569'],
-];
+// Messagerie : messages non lus
+$unreadCountStmt = $db->prepare("SELECT COUNT(*) FROM message_recipients WHERE user_id = ? AND read_at IS NULL");
+$unreadCountStmt->execute([$user['id']]);
+$messagesNewDot = (int)$unreadCountStmt->fetchColumn() > 0;
+
+// Cotations : nouveau PDF depuis dernier passage
+$cotationsDir  = '/var/www/html/media/cotations';
+$latestPdfTime = 0;
+if (is_dir($cotationsDir)) {
+    foreach (glob($cotationsDir . '/*.pdf') as $file) {
+        $mtime = filemtime($file);
+        if ($mtime > $latestPdfTime) $latestPdfTime = $mtime;
+    }
+}
+$lastVisitCotations = getLastPageVisit($user['id'], 'cotations');
+$cotationsNewDot = $latestPdfTime > 0 &&
+    (!$lastVisitCotations || $latestPdfTime > strtotime($lastVisitCotations));
+
+// Annonces : nouvelle annonce depuis dernier passage
+$lastVisitAnnonces  = getLastPageVisit($user['id'], 'annonces');
+$latestAnnonceAt    = $db->query("SELECT MAX(created_at) FROM annonces WHERE visible = 1")->fetchColumn();
+$annoncesNewDot     = $latestAnnonceAt &&
+    (!$lastVisitAnnonces || $latestAnnonceAt > $lastVisitAnnonces);
+
+// Fichiers personnels : nouveau fichier depuis dernier passage
+$lastVisitFichiers = getLastPageVisit($user['id'], 'fichiers');
+$fichiersNewDot    = false;
+if ($lastVisitFichiers) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM files_bo_name WHERE owner_id = ? AND group_id IS NULL AND created_at > ?");
+    $stmt->execute([$user['id'], $lastVisitFichiers]);
+    $fichiersNewDot = (int)$stmt->fetchColumn() > 0;
+}
+
+// Fichiers de groupe : nouveau fichier dans les groupes de l'utilisateur
+$lastVisitFichiersGroupes = getLastPageVisit($user['id'], 'fichiers-groupes');
+$fichiersGroupesNewDot    = false;
+if ($lastVisitFichiersGroupes) {
+    $stmt = $db->prepare("
+        SELECT COUNT(*) FROM files_bo_name f
+        JOIN files_bo_group_members m ON m.group_id = f.group_id AND m.user_id = ?
+        WHERE f.created_at > ?
+    ");
+    $stmt->execute([$user['id'], $lastVisitFichiersGroupes]);
+    $fichiersGroupesNewDot = (int)$stmt->fetchColumn() > 0;
+}
 
 include __DIR__ . '/../includes/header.php';
 ?>
 <div class="module-grid">
 
-    <div class="module-card" style="cursor:default;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem;">
-            <div style="display:flex; align-items:center; gap:.5rem;">
-                <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#9993;</span>
-                <h3 style="margin:0;">Messagerie</h3>
-                <?php if ($unreadCount > 0): ?>
-                    <span style="background:#ef4444; color:#fff; border-radius:999px; padding:.1rem .45rem; font-size:.68rem; font-weight:700;">
-                        <?= $unreadCount ?>
-                    </span>
-                <?php endif; ?>
-            </div>
-            <a href="/messages" style="font-size:.78rem; color:var(--primary); text-decoration:none; white-space:nowrap;">Tous &rarr;</a>
+    <div class="module-card" onclick="location.href='/messages'" style="cursor:pointer;">
+        <div style="display:flex; align-items:center; gap:.5rem;">
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#9993;</span>
+            <h3 style="margin:0;">Messagerie</h3>
+            <?php if ($messagesNewDot): ?>
+                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+            <?php endif; ?>
         </div>
-        <?php if (empty($dashMessages)): ?>
-            <p style="color:var(--muted); font-size:.82rem; font-style:italic;">Aucun message re&ccedil;u.</p>
-        <?php else: ?>
-            <?php $msg = $dashMessages[0]; $unread = !$msg['read_at']; ?>
-            <a href="/message?id=<?= $msg['id'] ?>"
-               style="display:flex; align-items:center; gap:.4rem; text-decoration:none; color:inherit; font-size:.84rem; overflow:hidden;">
-                <?php if ($unread): ?>
-                    <span style="width:7px; height:7px; border-radius:50%; background:var(--primary); flex-shrink:0;"></span>
-                <?php else: ?>
-                    <span style="width:7px; flex-shrink:0;"></span>
-                <?php endif; ?>
-                <span style="<?= $unread ? 'font-weight:700;' : '' ?> overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
-                    <?= htmlspecialchars($msg['subject']) ?>
-                </span>
-                <span style="font-size:.73rem; color:var(--muted); flex-shrink:0;">
-                    <?= date('d/m', strtotime($msg['created_at'])) ?>
-                </span>
-            </a>
-        <?php endif; ?>
     </div>
 
-    <div class="module-card" style="cursor:default;">
-        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem;">
+    <div class="module-card" onclick="location.href='/cotations'" style="cursor:pointer;">
+        <div style="display:flex; align-items:center; gap:.5rem;">
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128196;</span>
             <h3 style="margin:0;">Cotations</h3>
+            <?php if ($cotationsNewDot): ?>
+                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+            <?php endif; ?>
         </div>
-        <?php if ($latestPdf): ?>
-            <a href="/media/cotations/<?= rawurlencode($latestPdf) ?>" target="_blank" rel="noopener"
-               style="display:flex; align-items:center; gap:.5rem; text-decoration:none; color:var(--primary);
-                      padding:.5rem .6rem; border:1px solid var(--border); border-radius:8px;
-                      font-size:.85rem; word-break:break-word;">
-                <span style="font-size:1.2rem;">&#128462;</span>
-                <?= htmlspecialchars($latestPdf) ?>
-            </a>
-        <?php else: ?>
-            <p style="color:var(--muted); font-size:.82rem; font-style:italic;">Aucune cotation disponible.</p>
-        <?php endif; ?>
     </div>
 
-    <div class="module-card" style="cursor:default;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
-            <div style="display:flex; align-items:center; gap:.5rem;">
-                <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128668;</span>
-                <h3 style="margin:0;">Annonces</h3>
-            </div>
-            <a href="/annonces" style="font-size:.78rem; color:var(--primary); text-decoration:none; white-space:nowrap;">Toutes &rarr;</a>
+    <div class="module-card" onclick="location.href='/annonces'" style="cursor:pointer;">
+        <div style="display:flex; align-items:center; gap:.5rem;">
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128668;</span>
+            <h3 style="margin:0;">Annonces</h3>
+            <?php if ($annoncesNewDot): ?>
+                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+            <?php endif; ?>
         </div>
-        <?php if (empty($recentAnnonces)): ?>
-            <p style="color:var(--muted); font-size:.82rem; font-style:italic;">Aucune annonce pour le moment.</p>
-        <?php else: ?>
-            <?php foreach ($recentAnnonces as $a):
-                $tc = $tagColors[$a['tag']] ?? $tagColors['divers'];
-            ?>
-            <a href="/annonce?id=<?= $a['id'] ?>" class="annonce-home-item" style="padding:.45rem 0;">
-                <div class="annonce-home-header">
-                    <span class="annonce-tag" style="background:<?= $tc['bg'] ?>; color:<?= $tc['color'] ?>; font-size:.65rem;">
-                        <?= htmlspecialchars($a['tag']) ?>
-                    </span>
-                    <?php if ($a['prix'] !== null): ?>
-                        <span style="font-size:.78rem; color:var(--primary); font-weight:700; margin-left:auto;">
-                            <?= number_format((float)$a['prix'], 2, ',', '&thinsp;') ?>&thinsp;&euro;
-                        </span>
-                    <?php endif; ?>
-                </div>
-                <h3 style="font-size:.82rem;"><?= htmlspecialchars($a['titre']) ?></h3>
-            </a>
-            <?php endforeach; ?>
-        <?php endif; ?>
     </div>
 
     <div class="module-card" onclick="location.href='/produits'">
@@ -148,17 +103,23 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </div>
 
-    <div class="module-card" onclick="location.href='/fichiers'">
+    <div class="module-card" onclick="location.href='/fichiers'" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:.5rem;">
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128193;</span>
             <h3 style="margin:0;">Fichiers</h3>
+            <?php if ($fichiersNewDot): ?>
+                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+            <?php endif; ?>
         </div>
     </div>
 
-    <div class="module-card" onclick="location.href='/fichiers-groupes'">
+    <div class="module-card" onclick="location.href='/fichiers-groupes'" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:.5rem;">
-            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128101;</span>
-            <h3 style="margin:0;">Fichiers de groupes</h3>
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128450;</span>
+            <h3 style="margin:0;">Fichiers de groupe</h3>
+            <?php if ($fichiersGroupesNewDot): ?>
+                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+            <?php endif; ?>
         </div>
     </div>
 

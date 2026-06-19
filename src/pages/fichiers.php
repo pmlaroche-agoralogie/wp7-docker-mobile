@@ -5,6 +5,8 @@ require_once __DIR__ . '/../includes/files.php';
 $user      = getCurrentUser();
 $pageTitle = 'Mes fichiers — ' . SITE_NAME;
 
+recordPageVisit($user['id'], 'fichiers');
+
 $currentPath = fileNormalizePath($_GET['path'] ?? '/');
 
 $error   = '';

@@ -183,6 +183,16 @@ function initDB(PDO $pdo): void {
         );
     ");
 
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS page_visits (
+            user_id INTEGER NOT NULL,
+            page TEXT NOT NULL,
+            visited_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, page),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ");
+
     // Migrate: add meteo_code_insee to users if missing
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN meteo_code_insee TEXT DEFAULT '64430'");
@@ -253,4 +263,19 @@ function initDB(PDO $pdo): void {
                 ->execute([$row['slug'], $row['content']]);
         }
     }
+}
+
+function recordPageVisit(int $userId, string $page): void {
+    $db = getDB();
+    $db->prepare("
+        INSERT INTO page_visits (user_id, page, visited_at) VALUES (?, ?, datetime('now'))
+        ON CONFLICT(user_id, page) DO UPDATE SET visited_at = datetime('now')
+    ")->execute([$userId, $page]);
+}
+
+function getLastPageVisit(int $userId, string $page): ?string {
+    $db = getDB();
+    $stmt = $db->prepare("SELECT visited_at FROM page_visits WHERE user_id = ? AND page = ?");
+    $stmt->execute([$userId, $page]);
+    return $stmt->fetchColumn() ?: null;
 }

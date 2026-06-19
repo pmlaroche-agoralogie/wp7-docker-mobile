@@ -39,6 +39,7 @@ $routes = [
     'admin/annonces'     => 'pages/admin/annonces.php',
     'admin/annonce-edit' => 'pages/admin/annonce-edit.php',
     'api/meteo-set'      => 'pages/api/meteo-set.php',
+    'cotations'          => 'pages/cotations.php',
     'admin/cotations'    => 'pages/admin/cotations.php',
     'messages'               => 'pages/messages.php',
     'message'                => 'pages/message.php',

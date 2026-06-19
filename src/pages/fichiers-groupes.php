@@ -5,6 +5,8 @@ require_once __DIR__ . '/../includes/files.php';
 $user      = getCurrentUser();
 $pageTitle = 'Fichiers groupes — ' . SITE_NAME;
 
+recordPageVisit($user['id'], 'fichiers-groupes');
+
 $groups  = fileUserGroups($user['id']);
 $groupId = isset($_GET['group']) ? (int)$_GET['group'] : null;
 
