@@ -57,12 +57,15 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="produits-header">
     <h1 class="page-title">Nos produits</h1>
+    <div style="display:flex; align-items:center; gap:.6rem;">
+    <a href="/dashboard" class="btn btn-sm">&larr; Accueil</a>
     <a href="/panier" class="btn btn-primary panier-btn">
         &#128722; Mon panier
         <?php if ($nbArticles > 0): ?>
             <span class="panier-badge"><?= $nbArticles ?></span>
         <?php endif; ?>
     </a>
+    </div>
 </div>
 
 <?php if (isset($_GET['ajout'])): ?>

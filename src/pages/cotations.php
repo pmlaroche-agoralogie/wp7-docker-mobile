@@ -7,9 +7,13 @@ recordPageVisit($user['id'], 'cotations');
 
 $cotationsDir = '/var/www/html/media/cotations';
 $pdfs = [];
+$cutoff = time() - 60 * 86400;
 if (is_dir($cotationsDir)) {
     foreach (glob($cotationsDir . '/*.pdf') as $file) {
-        $pdfs[] = ['name' => basename($file), 'mtime' => filemtime($file)];
+        $mtime = filemtime($file);
+        if ($mtime >= $cutoff) {
+            $pdfs[] = ['name' => basename($file), 'mtime' => $mtime];
+        }
     }
     usort($pdfs, fn($a, $b) => $b['mtime'] - $a['mtime']);
 }
@@ -19,7 +23,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap;">
     <h1 class="page-title" style="margin:0;">&#128196; Cotations</h1>
-    <a href="/dashboard" class="btn btn-sm">&larr; Tableau de bord</a>
+    <a href="/dashboard" class="btn btn-sm">&larr; Accueil</a>
 </div>
 
 <?php if (empty($pdfs)): ?>

@@ -68,6 +68,7 @@ body {
     color: var(--primary);
     line-height: 1.2;
     letter-spacing: -.02em;
+    text-align: center;
 }
 .logo-sub {
     font-size: .6rem;

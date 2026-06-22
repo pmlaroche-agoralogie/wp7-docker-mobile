@@ -62,13 +62,23 @@ if ($lastVisitFichiersGroupes) {
     $fichiersGroupesNewDot = (int)$stmt->fetchColumn() > 0;
 }
 
+// Sponsors : 2 tirés au sort parmi les actifs
+$allSponsors = $db->query("SELECT * FROM sponsors WHERE active = 1")->fetchAll();
+shuffle($allSponsors);
+$displayedSponsors = array_slice($allSponsors, 0, 2);
+
 include __DIR__ . '/../includes/header.php';
 ?>
 <div class="module-grid">
 
     <div class="module-card" onclick="location.href='/messages'" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:.5rem;">
-            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#9993;</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                 style="flex-shrink:0; color:var(--primary);">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <polyline points="2,4 12,13 22,4"></polyline>
+            </svg>
             <h3 style="margin:0;">Messagerie</h3>
             <?php if ($messagesNewDot): ?>
                 <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
@@ -98,7 +108,7 @@ include __DIR__ . '/../includes/header.php';
 
     <div class="module-card" onclick="location.href='/produits'">
         <div style="display:flex; align-items:center; gap:.5rem;">
-            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#127807;</span>
+            <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128722;</span>
             <h3 style="margin:0;">Boutique</h3>
         </div>
     </div>
@@ -106,7 +116,7 @@ include __DIR__ . '/../includes/header.php';
     <div class="module-card" onclick="location.href='/fichiers'" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:.5rem;">
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128193;</span>
-            <h3 style="margin:0;">Fichiers</h3>
+            <h3 style="margin:0;">Personnel</h3>
             <?php if ($fichiersNewDot): ?>
                 <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
             <?php endif; ?>
@@ -116,7 +126,7 @@ include __DIR__ . '/../includes/header.php';
     <div class="module-card" onclick="location.href='/fichiers-groupes'" style="cursor:pointer;">
         <div style="display:flex; align-items:center; gap:.5rem;">
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128450;</span>
-            <h3 style="margin:0;">Fichiers de groupe</h3>
+            <h3 style="margin:0;">Général</h3>
             <?php if ($fichiersGroupesNewDot): ?>
                 <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
             <?php endif; ?>
@@ -222,6 +232,21 @@ include __DIR__ . '/../includes/header.php';
     }
     </script>
 
+    <?php if (!empty($displayedSponsors)): ?>
+    <div class="module-card" style="cursor:default;">
+        <div style="display:flex; align-items:center; justify-content:<?= count($displayedSponsors) > 1 ? 'space-around' : 'center' ?>; gap:1rem; flex-wrap:wrap;">
+            <?php foreach ($displayedSponsors as $sp): ?>
+            <a href="<?= htmlspecialchars($sp['url']) ?>" target="_blank" rel="noopener noreferrer"
+               style="display:block; flex:1; min-width:80px; max-width:120px; text-align:center;">
+                <img src="/media/sponsors/<?= htmlspecialchars($sp['logo']) ?>"
+                     alt="<?= htmlspecialchars($sp['name']) ?>"
+                     style="max-width:100%; max-height:60px; object-fit:contain;">
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php if ($user['role'] === 'admin'): ?>
 
     <div class="module-card" onclick="location.href='/admin/users'">
@@ -277,6 +302,12 @@ include __DIR__ . '/../includes/header.php';
                 </span>
             </div>
         <?php endif; ?>
+    </div>
+
+    <div class="module-card" onclick="location.href='/admin/sponsors'">
+        <div class="mod-icon">&#127775;</div>
+        <h3>Sponsors</h3>
+        <p>Ajouter, activer ou supprimer des sponsors</p>
     </div>
 
     <?php endif; ?>

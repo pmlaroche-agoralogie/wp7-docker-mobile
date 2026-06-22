@@ -103,7 +103,7 @@ include __DIR__ . '/../../includes/header.php';
 
 <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;">
     <h1 class="page-title" style="margin:0;">Groupes de fichiers</h1>
-    <a href="/dashboard" class="btn btn-sm">&larr; Tableau de bord</a>
+    <a href="/dashboard" class="btn btn-sm">&larr; Accueil</a>
 </div>
 
 <?php if ($message): ?><div class="alert alert-success" style="margin-bottom:1rem;"><?= $message ?></div><?php endif; ?>

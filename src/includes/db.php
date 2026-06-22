@@ -221,6 +221,22 @@ function initDB(PDO $pdo): void {
         $pdo->exec("ALTER TABLE users ADD COLUMN phone TEXT DEFAULT NULL");
     } catch (\PDOException $e) {}
 
+    // Migrate: add deleted flag to message_recipients if missing
+    try {
+        $pdo->exec("ALTER TABLE message_recipients ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0");
+    } catch (\PDOException $e) {}
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS sponsors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            url TEXT NOT NULL,
+            logo TEXT NOT NULL,
+            active INTEGER NOT NULL DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+
     // Default admin
     $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM users WHERE role = 'admin'");
     if ((int)$stmt->fetch()['cnt'] === 0) {

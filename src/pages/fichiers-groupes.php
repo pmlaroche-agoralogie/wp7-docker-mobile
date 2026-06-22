@@ -79,7 +79,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap;">
     <h1 class="page-title" style="margin:0;">&#128101; Fichiers groupes</h1>
-    <a href="/dashboard" class="btn btn-sm">&larr; Tableau de bord</a>
+    <a href="/dashboard" class="btn btn-sm">&larr; Accueil</a>
     <a href="/fichiers" class="btn btn-sm" style="margin-left:auto;">Mes fichiers &rarr;</a>
 </div>
 

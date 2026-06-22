@@ -13,6 +13,7 @@ $stmt = $db->prepare("
     FROM messages m
     JOIN message_recipients mr ON mr.message_id = m.id AND mr.user_id = ?
     JOIN users u ON u.id = m.sender_id
+    WHERE mr.deleted = 0
     ORDER BY m.created_at DESC
 ");
 $stmt->execute([$user['id'], $user['id']]);
@@ -23,7 +24,7 @@ include __DIR__ . '/../includes/header.php';
 
 <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap;">
     <h1 class="page-title" style="margin:0;">Messagerie</h1>
-    <a href="/dashboard" class="btn btn-sm">&larr; Tableau de bord</a>
+    <a href="/dashboard" class="btn btn-sm">&larr; Accueil</a>
 </div>
 
 <?php if (empty($messages)): ?>

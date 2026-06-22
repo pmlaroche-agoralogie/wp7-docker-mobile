@@ -37,9 +37,15 @@ if (!$isAdmin) {
     }
 }
 
-// Handle reply (users only)
+// Handle reply or delete (users only)
 $replyError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isAdmin) {
+    if (isset($_POST['delete_message'])) {
+        $db->prepare("UPDATE message_recipients SET deleted = 1 WHERE message_id = ? AND user_id = ?")
+           ->execute([$id, $user['id']]);
+        header('Location: /messages');
+        exit;
+    }
     $body = trim($_POST['reply_body'] ?? '');
     if ($body === '') {
         $replyError = 'Le message ne peut pas être vide.';
@@ -128,6 +134,22 @@ include __DIR__ . '/../includes/header.php';
         </div>
         <?php if ($isAdmin): ?>
             <a href="/admin/message-new" class="btn btn-primary" style="white-space:nowrap;">+ Nouveau</a>
+        <?php else: ?>
+            <form method="post" onsubmit="return confirm('Supprimer ce message ?');" style="margin:0;">
+                <input type="hidden" name="delete_message" value="1">
+                <button type="submit" title="Supprimer le message"
+                        style="background:none; border:none; cursor:pointer; padding:.35rem .5rem;
+                               color:var(--muted); line-height:1; border-radius:6px;"
+                        onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--muted)'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                        <path d="M10 11v6"></path><path d="M14 11v6"></path>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                    </svg>
+                </button>
+            </form>
         <?php endif; ?>
     </div>
 
