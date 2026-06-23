@@ -81,7 +81,10 @@ include __DIR__ . '/../includes/header.php';
             </svg>
             <h3 style="margin:0;">Messagerie</h3>
             <?php if ($messagesNewDot): ?>
-                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                <span style="margin-left:auto; display:flex; align-items:center; gap:.35rem; flex-shrink:0;">
+                    <span style="font-size:.68rem; color:#ef4444; font-weight:600; white-space:nowrap;">il y a du nouveau</span>
+                    <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                </span>
             <?php endif; ?>
         </div>
     </div>
@@ -91,7 +94,10 @@ include __DIR__ . '/../includes/header.php';
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128196;</span>
             <h3 style="margin:0;">Cotations</h3>
             <?php if ($cotationsNewDot): ?>
-                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                <span style="margin-left:auto; display:flex; align-items:center; gap:.35rem; flex-shrink:0;">
+                    <span style="font-size:.68rem; color:#ef4444; font-weight:600; white-space:nowrap;">il y a du nouveau</span>
+                    <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                </span>
             <?php endif; ?>
         </div>
     </div>
@@ -101,7 +107,10 @@ include __DIR__ . '/../includes/header.php';
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128668;</span>
             <h3 style="margin:0;">Annonces</h3>
             <?php if ($annoncesNewDot): ?>
-                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                <span style="margin-left:auto; display:flex; align-items:center; gap:.35rem; flex-shrink:0;">
+                    <span style="font-size:.68rem; color:#ef4444; font-weight:600; white-space:nowrap;">il y a du nouveau</span>
+                    <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                </span>
             <?php endif; ?>
         </div>
     </div>
@@ -118,7 +127,10 @@ include __DIR__ . '/../includes/header.php';
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128193;</span>
             <h3 style="margin:0;">Personnel</h3>
             <?php if ($fichiersNewDot): ?>
-                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                <span style="margin-left:auto; display:flex; align-items:center; gap:.35rem; flex-shrink:0;">
+                    <span style="font-size:.68rem; color:#ef4444; font-weight:600; white-space:nowrap;">il y a du nouveau</span>
+                    <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                </span>
             <?php endif; ?>
         </div>
     </div>
@@ -128,7 +140,10 @@ include __DIR__ . '/../includes/header.php';
             <span class="mod-icon" style="font-size:1.4rem; margin:0;">&#128450;</span>
             <h3 style="margin:0;">Général</h3>
             <?php if ($fichiersGroupesNewDot): ?>
-                <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                <span style="margin-left:auto; display:flex; align-items:center; gap:.35rem; flex-shrink:0;">
+                    <span style="font-size:.68rem; color:#ef4444; font-weight:600; white-space:nowrap;">il y a du nouveau</span>
+                    <span style="width:9px; height:9px; border-radius:50%; background:#ef4444; flex-shrink:0; display:inline-block;"></span>
+                </span>
             <?php endif; ?>
         </div>
     </div>

@@ -47,7 +47,7 @@ include __DIR__ . '/../includes/header.php';
         <?php if ($annonce['prix'] !== null): ?>
             <span class="annonce-prix"><?= number_format((float)$annonce['prix'], 2, ',', '&thinsp;') ?>&thinsp;&euro; <span style="font-size:.7em; font-weight:600; vertical-align:middle;">HT</span></span>
         <?php else: ?>
-            <span style="color:var(--muted);">Prix sur demande</span>
+            <span style="color:var(--muted);">Prix non communiqué</span>
         <?php endif; ?>
         <span style="margin-left:auto;">Publi&eacute;e le <?= date('d/m/Y', strtotime($annonce['created_at'])) ?></span>
     </div>
@@ -67,13 +67,13 @@ include __DIR__ . '/../includes/header.php';
 
     <?php if (!empty($medias)): ?>
     <div class="annonce-medias-grid"
-         data-gallery='<?= htmlspecialchars(json_encode(array_map(
+         data-gallery='<?= htmlspecialchars(json_encode(array_values(array_map(
              fn($m) => '/uploads/annonces/' . $m['fichier'],
              array_filter($medias, fn($m) => $m['type'] === 'photo')
-         ))) ?>'>
-        <?php foreach ($medias as $i => $m): ?>
+         )))) ?>'>
+        <?php $photoIndex = 0; foreach ($medias as $m): ?>
             <?php if ($m['type'] === 'photo'): ?>
-            <div class="annonce-media-item" data-index="<?= $i ?>" onclick="openLightbox(this)">
+            <div class="annonce-media-item" data-index="<?= $photoIndex++ ?>" onclick="openLightbox(this)">
                 <img src="/uploads/annonces/<?= htmlspecialchars($m['fichier']) ?>"
                      alt="Photo <?= $i + 1 ?>" loading="lazy">
             </div>

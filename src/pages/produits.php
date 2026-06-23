@@ -93,7 +93,7 @@ include __DIR__ . '/../includes/header.php';
                 <?php if ($p['prix_ht'] > 0): ?>
                     <strong><?= number_format($p['prix_ht'], 2, ',', ' ') ?> € HT</strong>
                 <?php else: ?>
-                    <span class="text-muted">Prix sur demande</span>
+                    <span class="text-muted">Prix non communiqué</span>
                 <?php endif; ?>
             </div>
             <form method="post" class="produit-form">

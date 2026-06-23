@@ -260,7 +260,7 @@ include __DIR__ . '/../includes/header.php';
 <?php if (!$isAdmin): ?>
 <!-- Formulaire de réponse -->
 <div class="card">
-    <h2 style="font-size:.95rem; margin-bottom:.75rem;">R&eacute;pondre</h2>
+    <h2 style="font-size:.95rem; margin-bottom:.75rem;">R&eacute;pondre à l&rsquo;administrateur</h2>
     <?php if ($replyError): ?>
         <div class="alert alert-error"><?= htmlspecialchars($replyError) ?></div>
     <?php endif; ?>

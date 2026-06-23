@@ -55,8 +55,9 @@ $pageTitle = 'Petites annonces — ' . SITE_NAME;
 include __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="margin-bottom:1rem;">
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
     <h1 class="page-title" style="margin:0;">Petites annonces</h1>
+    <a href="/dashboard" class="btn btn-sm">&larr; Accueil</a>
 </div>
 
 <form method="get" class="annonces-filters">
@@ -113,7 +114,7 @@ include __DIR__ . '/../includes/header.php';
                 <?php if ($a['prix'] !== null): ?>
                     <span class="annonce-prix"><?= number_format((float)$a['prix'], 2, ',', '&thinsp;') ?>&thinsp;&euro;</span>
                 <?php else: ?>
-                    <span style="color:var(--muted);">Prix sur demande</span>
+                    <span style="color:var(--muted);">Prix non communiqué</span>
                 <?php endif; ?>
             </div>
         </div>

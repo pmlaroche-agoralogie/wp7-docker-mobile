@@ -61,6 +61,8 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex: 1;
+    align-items: center;
 }
 .logo-name {
     font-size: 1.1rem;
@@ -68,7 +70,6 @@ body {
     color: var(--primary);
     line-height: 1.2;
     letter-spacing: -.02em;
-    text-align: center;
 }
 .logo-sub {
     font-size: .6rem;

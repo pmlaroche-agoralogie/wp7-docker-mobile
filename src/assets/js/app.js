@@ -15,12 +15,11 @@ var _lbImages = [];
 var _lbIndex  = 0;
 
 function openLightbox(el) {
-    var grid = el.closest('.gallery-grid');
+    var grid = el.closest('[data-gallery]');
     _lbImages = JSON.parse(grid.dataset.gallery);
     _lbIndex  = parseInt(el.dataset.index, 10);
 
-    // Build captions from alt attributes
-    var items = grid.querySelectorAll('.gallery-item img');
+    var items = grid.querySelectorAll('img');
     var caps  = Array.from(items).map(function (img) { return img.alt || ''; });
 
     _lbShow(caps);

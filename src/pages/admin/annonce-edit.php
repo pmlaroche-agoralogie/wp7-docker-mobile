@@ -158,7 +158,7 @@ include __DIR__ . '/../../includes/header.php';
             <div class="form-group" style="flex:1; min-width:160px;">
                 <label for="prix">Prix (€) <span style="color:var(--muted); font-weight:400; font-size:.82rem;">optionnel</span></label>
                 <input type="text" id="prix" name="prix" inputmode="decimal" style="max-width:180px;"
-                       placeholder="Laisser vide = prix sur demande"
+                       placeholder="Laisser vide = Prix non communiqué"
                        value="<?= $annonce['prix'] !== null ? htmlspecialchars(number_format((float)($annonce['prix'] ?? 0), 2, '.', '')) : '' ?>">
             </div>
         </div>
