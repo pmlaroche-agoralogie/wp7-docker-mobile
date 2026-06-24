@@ -54,7 +54,6 @@ function navLink(string $label, string $href, string $uri): string {
             <?= navLink('Adh&eacute;sion', '/adhesion', $currentUri) ?>
             <?= navLink('Actualit&eacute;s', '/news', $currentUri) ?>
             <?php if ($currentUser): ?>
-                <?= navLink('Mon espace', '/dashboard', $currentUri) ?>
                 <?php if ($currentUser['role'] === 'admin'): ?>
                     <?= navLink('Admin', '/admin/users', $currentUri) ?>
                 <?php endif; ?>

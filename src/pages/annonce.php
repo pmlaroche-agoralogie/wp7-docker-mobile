@@ -75,7 +75,7 @@ include __DIR__ . '/../includes/header.php';
             <?php if ($m['type'] === 'photo'): ?>
             <div class="annonce-media-item" data-index="<?= $photoIndex++ ?>" onclick="openLightbox(this)">
                 <img src="/uploads/annonces/<?= htmlspecialchars($m['fichier']) ?>"
-                     alt="Photo <?= $i + 1 ?>" loading="lazy">
+                     alt="Photo <?= $photoIndex ?>" loading="lazy">
             </div>
             <?php else: ?>
             <div style="border-radius:8px; overflow:hidden; background:#000;">
