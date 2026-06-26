@@ -51,6 +51,7 @@ $routes = [
     'fichiers-dl'            => 'pages/fichiers-dl.php',
     'api/put_user_file'      => 'pages/api/put_user_file.php',
     'admin/sponsors'         => 'pages/admin/sponsors.php',
+    'informations-legales'   => 'pages/informations-legales.php',
 ];
 
 $page = isset($routes[$uri]) ? __DIR__ . '/' . $routes[$uri] : null;

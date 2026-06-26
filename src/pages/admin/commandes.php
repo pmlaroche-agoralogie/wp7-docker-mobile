@@ -2,13 +2,21 @@
 requireAdmin();
 $db = getDB();
 
-// ── POST : marquer livré ──────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'livrer') {
+// ── POST ─────────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action   = $_POST['action'] ?? '';
     $panierId = (int)($_POST['panier_id'] ?? 0);
-    if ($panierId > 0) {
+
+    if ($action === 'livrer' && $panierId > 0) {
         $db->prepare("UPDATE paniers SET statut = 'livre', updated_at = datetime('now') WHERE id = ? AND statut = 'commande'")
            ->execute([$panierId]);
     }
+
+    if ($action === 'annuler' && $panierId > 0) {
+        $db->prepare("UPDATE paniers SET statut = 'annule', updated_at = datetime('now') WHERE id = ? AND statut = 'commande'")
+           ->execute([$panierId]);
+    }
+
     header("Location: /admin/commandes");
     exit;
 }
@@ -77,6 +85,11 @@ include __DIR__ . '/../../includes/header.php';
                     <input type="hidden" name="action" value="livrer">
                     <input type="hidden" name="panier_id" value="<?= $c['id'] ?>">
                     <button type="submit" class="btn btn-primary btn-sm">&#128666; Marquer livr&eacute;e</button>
+                </form>
+                <form method="post" onsubmit="return confirm('Annuler cette commande ?');">
+                    <input type="hidden" name="action" value="annuler">
+                    <input type="hidden" name="panier_id" value="<?= $c['id'] ?>">
+                    <button type="submit" class="btn btn-sm btn-danger">&#10005; Annuler</button>
                 </form>
                 <?php endif; ?>
             </div>

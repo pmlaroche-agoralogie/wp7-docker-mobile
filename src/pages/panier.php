@@ -33,6 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($action === 'annuler_commande') {
+        $panierId = (int)($_POST['panier_id'] ?? 0);
+        if ($panierId > 0) {
+            $db->prepare("UPDATE paniers SET statut = 'annule', updated_at = datetime('now') WHERE id = ? AND user_id = ? AND statut = 'commande'")
+               ->execute([$panierId, $user['id']]);
+        }
+        header("Location: /panier");
+        exit;
+    }
+
     if ($action === 'commander') {
         $stmt = $db->prepare("SELECT id FROM paniers WHERE user_id = ? AND statut = 'panier' LIMIT 1");
         $stmt->execute([$user['id']]);
@@ -62,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $corps .= "- {$l['titre']} x{$l['quantite']} = " . number_format($sous, 2, ',', ' ') . " € HT\n";
                     }
                     $corps .= "\nTotal : " . number_format($total, 2, ',', ' ') . " € HT\n";
-                    @mail($adminEmail, '[' . SITE_NAME . '] Nouvelle commande', $corps, "From: noreply@elvea64-40.fr");
+                    @mail($adminEmail, '[' . SITE_NAME . '] Nouvelle commande', $corps, "From: noreply@elvea64-40.fr\r\nBcc: asso@elvea64.fr");
                 }
 
                 header("Location: /panier?commande=1");
@@ -123,6 +133,11 @@ include __DIR__ . '/../includes/header.php';
             Votre commande a &eacute;t&eacute; transmise le <?= date('d/m/Y', strtotime($panierCourant['updated_at'])) ?>.
             Vous serez contact&eacute; d&egrave;s qu'elle sera trait&eacute;e.
         </p>
+        <form method="post" style="margin-top:1.25rem;" onsubmit="return confirm('Annuler cette commande ?');">
+            <input type="hidden" name="action" value="annuler_commande">
+            <input type="hidden" name="panier_id" value="<?= $panierCourant['id'] ?>">
+            <button type="submit" class="btn btn-sm btn-danger">&#10005; Annuler la commande</button>
+        </form>
     </div>
 
 <?php else: ?>
